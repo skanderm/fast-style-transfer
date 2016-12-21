@@ -1,7 +1,7 @@
 from __future__ import print_function
 import sys, os, pdb
 sys.path.insert(0, 'src')
-import numpy as np, scipy.misc 
+import numpy as np, scipy.misc
 from optimize import optimize
 from argparse import ArgumentParser
 from utils import save_img, get_img, exists, list_files
@@ -69,7 +69,7 @@ def build_parser():
                         dest='content_weight',
                         help='content weight (default %(default)s)',
                         metavar='CONTENT_WEIGHT', default=CONTENT_WEIGHT)
-    
+
     parser.add_argument('--style-weight', type=float,
                         dest='style_weight',
                         help='style weight (default %(default)s)',
@@ -79,11 +79,15 @@ def build_parser():
                         dest='tv_weight',
                         help='total variation regularization weight (default %(default)s)',
                         metavar='TV_WEIGHT', default=TV_WEIGHT)
-    
+
     parser.add_argument('--learning-rate', type=float,
                         dest='learning_rate',
                         help='learning rate (default %(default)s)',
                         metavar='LEARNING_RATE', default=LEARNING_RATE)
+
+    parser.add_argument('--from-checkpoint', type=str,
+                        dest='from_checkpoint', help='checkpoint to resume from',
+                        metavar='FROM_CHECKPOINT', default=None, required=False)
 
     return parser
 
@@ -107,7 +111,7 @@ def check_opts(opts):
 def _get_files(img_dir):
     files = list_files(img_dir)
     return map(lambda x: os.path.join(img_dir,x), files)
-    
+
 def main():
     parser = build_parser()
     options = parser.parse_args()
@@ -140,7 +144,8 @@ def main():
         options.content_weight,
         options.style_weight,
         options.tv_weight,
-        options.vgg_path
+        options.vgg_path,
+        options.from_checkpoint
     ]
 
     for preds, losses, i, epoch in optimize(*args, **kwargs):

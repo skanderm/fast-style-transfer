@@ -10,7 +10,7 @@ DEVICES = 'CUDA_VISIBLE_DEVICES'
 
 # np arr, np arr
 def optimize(content_targets, style_target, content_weight, style_weight,
-             tv_weight, vgg_path, epochs=2, print_iterations=1000,
+             tv_weight, vgg_path, from_checkpoint=None, epochs=2, print_iterations=1000,
              batch_size=4, save_path='saver/fns.ckpt', slow=False,
              learning_rate=1e-3, debug=False):
     if slow:
@@ -18,7 +18,7 @@ def optimize(content_targets, style_target, content_weight, style_weight,
     mod = len(content_targets) % batch_size
     if mod > 0:
         print("Train set has been trimmed slightly..")
-        content_targets = content_targets[:-mod] 
+        content_targets = content_targets[:-mod]
 
     style_features = {}
 
@@ -85,6 +85,10 @@ def optimize(content_targets, style_target, content_weight, style_weight,
         tv_loss = tv_weight*2*(x_tv/tv_x_size + y_tv/tv_y_size)/batch_size
 
         loss = content_loss + style_loss + tv_loss
+
+        if from_checkpoint is not None:
+            saver = tf.train.Saver()
+            saver.restore(sess, from_checkpoint)
 
         # overall loss
         train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
